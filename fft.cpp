@@ -3,18 +3,26 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <cmath>
+#include <functional>
+#include <tuple>
+#include <cassert>
+
 const double PI = 3.141592653589793;
 
 
 std::vector<FFT::Complex> FFT::compute(std::vector<Complex>& data, bool inverse) {
     size_t N = data.size();
     
-    if (N == 0 || !is_valid_size(N)) {
-        throw std::invalid_argument("FFT size must be a product of 2, 3, and/or 5");
-    }
+    // if (N == 0 || !is_valid_size(N)) {
+    //     throw std::invalid_argument("FFT size must be a product of 2, 3, and/or 5");
+    // }
 
     std::vector<Complex> data_fft(N);
-    fft(data, data_fft, N, inverse);
+    // data_fft = mixed_radix_fft(data,inverse);
+    // fft(data, data_fft, N, inverse);
+    data_fft = dft(data,inverse );
+    // fft_mixed_radix(data, inverse);
     // data_fft = fft2(data,inverse );
     return data_fft;
 }
@@ -38,11 +46,76 @@ bool FFT::is_valid_size(size_t N) {
     return N == 1;
 }
 
-void FFT::fft(const std::vector<Complex>& data,std::vector<Complex>& data_fft, size_t N, bool inverse) { 
-    data_fft = data;
-    
-    int log2 = std::log2(N);
+// void FFT::fft_recursive(std::vector<Complex>& data, std::vector<Complex>& data_fft, size_t N, int base, bool inverse) {
+//     if (N <= 1) return;
 
+//     std::vector<Complex> even(N / base), odd(N / base);
+//     for (size_t i = 0; i < N / base; ++i) {
+//         even[i] = data[i * base];
+//         odd[i] = data[i * base + 1];
+//     }
+
+//     fft_recursive(even, data_fft, N / base, base, inverse);
+//     fft_recursive(odd, data_fft, N / base, base, inverse);
+
+//     double ang = 2 * M_PI / N * (inverse ? 1 : -1);
+//     Complex w(1);
+//     for (size_t j = 0; j < N / base; ++j) {
+//         data_fft[j] = even[j] + w * odd[j];
+//         data_fft[j + N / 2] = even[j] - w * odd[j];
+//         w *= std::polar(1.0, ang * (j + 1));
+//     }
+// }
+
+// void FFT::fft2(const std::vector<Complex>& data, std::vector<Complex>& data_fft, size_t N, bool inverse) {
+//     data_fft = data;
+//     int log2 = std::log2(N);
+
+//     // Реверсирование порядка
+//     for (size_t i = 0; i < N; i++) {
+//         if (i < revers(i, log2))
+//             std::swap(data_fft[i], data_fft[revers(i, log2)]);
+//     }
+
+//     // Применение FFT для разных баз
+//     if (N % 2 == 0) fft_recursive(data_fft, data_fft, N, 2, inverse);
+//     if (N % 3 == 0) fft_recursive(data_fft, data_fft, N, 3, inverse);
+//     if (N % 5 == 0) fft_recursive(data_fft, data_fft, N, 5, inverse);
+
+//     // Нормализация для обратного FFT
+//     if (inverse) {
+//         for (Complex& x : data_fft) x /= N;
+//     }
+// }
+std::vector<FFT::Complex> FFT::dft(const std::vector<Complex> &data, bool inverse){
+    
+    int N = data.size();
+    std::vector<Complex> data_dft(N);
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            double ang = (2 * PI * (inverse ? 1 : -1) * i * j) / N;
+            Complex exp = std::polar(1.0, ang);
+            data_dft[i] += data[j] * exp;
+        }
+    }
+
+    if(inverse){
+        for(Complex &x:data_dft){
+            x /= N; 
+        }
+    }
+
+    return data_dft;
+}
+
+
+
+void FFT::fft(const std::vector<Complex>& data,std::vector<Complex>& data_fft, size_t N, bool inverse) { 
+    
+    data_fft = data;
+    int log2 = std::log2(N);
+    std::cout<< "log2(N) = " << log2 << std::endl;
     // for(int i = 0; i < N; i++){
     //     data_fft[revers(i,log2)] = data_fft[i];
     // }
@@ -54,6 +127,7 @@ void FFT::fft(const std::vector<Complex>& data,std::vector<Complex>& data_fft, s
     }
 
     for(int l = 2; l <= N; l*=2){
+
         double ang = 2 * PI / l * (inverse ? 1 : -1);
         Complex exp = std::polar(1.0, ang);
         
@@ -65,6 +139,7 @@ void FFT::fft(const std::vector<Complex>& data,std::vector<Complex>& data_fft, s
                 data_fft[i+j] = u + v;
                 data_fft[i+j+l/2] = u - v;
                 w *= exp;
+                std::cout<< "w  = " << w  << " l  = " << l  <<" i  = " << i  <<" j  = " << j  << std::endl;    
             }
         }
     }
