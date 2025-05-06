@@ -1,18 +1,13 @@
 #include "fft.h"
 #include <iostream>
 #include <cmath>
-#include <stdexcept>
 
-#include <cmath>
-#include <functional>
-#include <tuple>
-#include <cassert>
 
 const double PI = 3.141592653589793;
 
 
 std::vector<FFT::Complex> FFT::compute(std::vector<Complex>& data, bool inverse) {
-    size_t N = data.size();
+    int N = data.size();
 
     std::vector<Complex> data_fft(N);
     data_fft = fft_mixed(data,inverse);
@@ -105,13 +100,13 @@ std::vector<FFT::Complex> FFT::fft_3(const std::vector<Complex>& data, bool inve
 
     std::vector<Complex> result(N);
 
-    for (int k = 0; k < N / 3; ++k) {
+    for (int k = 0; k < N / 3; k++) {
         Complex ws[5][4]; 
         int sign = inverse ? 1 : -1;
     
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; i++) {
             int shift = k + i * N / 3;
-            for (int j = 0; j < 2; ++j) {
+            for (int j = 0; j < 2; j++) {
                 double angle = 2.0 * PI * sign * (j+1) * shift / N;
                 ws[i][j] = std::polar(1.0, angle);
             }
@@ -121,7 +116,7 @@ std::vector<FFT::Complex> FFT::fft_3(const std::vector<Complex>& data, bool inve
         Complex b = fft_part2[k];
         Complex c = fft_part3[k];
     
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; i++) {
             result[k + i * N / 3] = a + ws[i][0] * b + ws[i][1] * c;
         }
     }
@@ -156,13 +151,13 @@ std::vector<FFT::Complex> FFT::fft_5(const std::vector<Complex>& data, bool inve
 
     std::vector<Complex> result(N);
 
-    for (int k = 0; k < N / 5; ++k) {
+    for (int k = 0; k < N / 5; k++) {
         Complex ws[5][4]; // матрица поворотных коэффициентов
         int sign = inverse ? 1 : -1;
     
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; i++) {
             int shift = k + i * N / 5;
-            for (int j = 1; j <= 4; ++j) {
+            for (int j = 1; j <= 4; j++) {
                 double angle = 2.0 * PI * sign * j * shift / N;
                 ws[i][j - 1] = std::polar(1.0, angle);
             }
