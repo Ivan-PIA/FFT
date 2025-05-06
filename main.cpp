@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "fft.h"
+
 using Complex = std::complex<double>;
 
 bool are_equal(const std::complex<double>& a, const std::complex<double>& b, double epsilon) { // добавлено из-за представления числа с плавающей точкой 
@@ -26,11 +27,7 @@ int check_error_fft(std::vector<std::complex<double>>& arr1, std::vector<std::co
 
 }
 
-
-int main() {
-    
-
-    int N = 42;  // длина, кратная 2 3 5
+std::vector<Complex> generate_random_qpsk(int N){
     std::vector<Complex> data(N);
 
     std::mt19937 rng(1);  // фиксируем сид
@@ -50,6 +47,15 @@ int main() {
         int b0 = bit_dist(rng);
         data[i] = bits_to_qpsk(b1, b0);
     }
+    return data;
+}
+
+
+int main() {
+
+    int N = 42;  // длина, кратная 2 3 5
+
+    std::vector<Complex> data = generate_random_qpsk(N);
 
     std::cout << "\nSize = " << N << "\n";
 
@@ -59,13 +65,8 @@ int main() {
     }
 
     // FFT
-    
     std::vector<Complex> data_ifft = FFT::compute(data, false);
 
-    std::cout << "\nQPSK сигнал:\n";
-    for (const auto& x : data) {
-        std::cout << "(" << x.real() << ", " << x.imag() << "i)\n";
-    }
     std::cout << "\nFFT:\n\n";
     for (const auto& x : data_ifft) {
         std::cout <<  "(" << x.real() << ", " << x.imag() << "i)\n";
