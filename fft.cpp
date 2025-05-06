@@ -40,15 +40,15 @@ std::vector<FFT::Complex> FFT::fft_mixed(const std::vector<Complex>& data, bool 
     // std::cout << "size = "<< N << std::endl;
 
     if (N % 2 == 0){ 
-        std::cout << "Using fft_2" << std::endl;
+        // std::cout << "Using fft_2" << std::endl;
         return fft_2(data, inverse);
     }
     else if (N % 3 == 0){
-        std::cout << "Using fft_3" << std::endl;
+        // std::cout << "Using fft_3" << std::endl;
         return fft_3(data, inverse);
     }
     else if (N % 5 == 0){
-        std::cout << "Using fft_5" << std::endl;
+        // std::cout << "Using fft_5" << std::endl;
         return fft_5(data, inverse);
     }
 
